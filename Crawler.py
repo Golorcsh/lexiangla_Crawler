@@ -3,18 +3,18 @@ from time import *
 import json
 import os
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver import ActionChains
+from requests import request
 
 
 class Crawler:
     cookies = {}
     user_agent = ''
-    login_url = ''
-    url = ''
+    login_url = 'https://lexiangla.com/login/'
+    url = 'https://lexiangla.com/events'
 
-    def __init__(self, user_agent, login_url, url):
+    def __init__(self, user_agent):
         self.user_agent = user_agent
-        self.login_url = login_url
-        self.url = url
         self.option = webdriver.ChromeOptions()
         # 添加User_Agent
         self.option.add_argument(self.user_agent)
@@ -25,11 +25,15 @@ class Crawler:
         # 新建chrome浏览器变量
         self.driver = webdriver.Chrome(options=self.option)
         # 最大化浏览器
-        # self.driver.maximize_window()
+        self.driver.maximize_window()
+        # 判断cookie文件是否存在，不存在先登录获取cookie
+        if not self.cookie_exist():
+            self.login_and_save_cookies()
 
-    def login_and_save_cookies(self, login_url):
+    def login_and_save_cookies(self):
         """打开登陆页面，登陆后抓取cookies信息保存下来以便之后自动登陆使用"""
-        self.driver.get(login_url)
+        print('cookie文件不存在，请先扫描登录')
+        self.driver.get(self.login_url)
         # 暂停10秒扫码登录
         sleep(10)
         # 登录后获得cookies
@@ -49,18 +53,9 @@ class Crawler:
             return False
 
     def get_cookie(self):
-        """判断是否有cookie文件，cookies是否过期，如果过期再次打开登录页面进行获取，若有未过期cookies直接返回"""
+        """打开读取cookie文件，返回cookie"""
         if self.cookie_exist():
             print("cookies文件存在")
-            # 获得cookies
-            file = open('cookies', 'r')
-            cookie = json.loads(file.read())[-1]
-            file.close()
-            print("读取cookie，返回cookie")
-            return cookie
-        else:
-            print("cookies文件不存在，跳转到登录界面进行获取")
-            self.login_and_save_cookies(self.login_url)
             # 获得cookies
             file = open('cookies', 'r')
             cookie = json.loads(file.read())[-1]
@@ -85,30 +80,29 @@ class Crawler:
     def find_latest_lecture(self, lecture_keyword):
         """输入讲座标题，搜索标题，查询符合元素，获取该讲座的链接，进入讲座具体页面"""
         lecture = None
-        search_times = 0
         # 通话标题关键字获得讲座链接
         while lecture is None:
-            search_times += 1
+            if lecture:
+                break
             try:
                 lecture = self.driver.find_element('partial link text', lecture_keyword)
+                self.driver.get(lecture.get_attribute('href'))
             except NoSuchElementException as error:
-                print('未找到讲座')
+                print('未找到讲座,刷新页面')
             self.driver.refresh()
 
-            if search_times == 100:
-                lecture_keyword = input('请输入讲座标题的其他关键字:')
-                search_times = 0
+    def enroll(self):
+        xpath = "//div[@class='mt-l']/button[@class='btn btn-primary btn-lg']"
+        xpath1 = "//div[@class='mt-l']/span[@class='secondary']"
+        self.driver.implicitly_wait(2)
+        button = None
+        while button is None:
+            try:
+                web_element_button = self.driver.find_element_by_xpath(xpath).click()
+            except NoSuchElementException as error:
+                print('未找到报名按钮')
 
-            if lecture_keyword == 'quit':
-                print('退出')
-                self.driver.close()
-                return
-
-        lecture_title = str(lecture.text)
-        print("查询成功，讲座：" + lecture_title)
-        # 获得讲座链接
-        lecture_href = lecture.get_attribute('href')
-        print("成功获得讲座详细界面链接")
-        # 进入具体讲座页面
-        self.driver.get(lecture_href)
-        print("进入讲座：" + lecture_title + '详细界面')
+            inform = self.driver.find_element_by_xpath(xpath1)
+            if button or inform:
+                print(inform.text)
+                break
