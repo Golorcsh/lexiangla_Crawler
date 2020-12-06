@@ -1,23 +1,31 @@
+"""
+_*_ coding:UTF-8 _*_
+Project:lexiangla
+File:Pyqt
+Author:Golor
+Date:2020/11/27
+"""
 from selenium import webdriver
 from time import *
 import json
 import os
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import ActionChains
-from requests import request
 
 
 class Crawler:
     cookies = {}
-    user_agent = ''
     login_url = 'https://lexiangla.com/login/'
     url = 'https://lexiangla.com/events'
+    user_agent = 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/87.0.4280.66Safari/537.36'
 
-    def __init__(self, user_agent):
-        self.user_agent = user_agent
+    def __init__(self, ):
         self.option = webdriver.ChromeOptions()
         # 添加User_Agent
         self.option.add_argument(self.user_agent)
+        # 无界面模式
+        self.option.add_argument('headless')
+        # 无图模式
+        self.option.add_argument('blink-settings=imagesEnabled=false')
         # 谷歌文档提到需要加上这个属性来规避bug
         self.option.add_argument('--disable-gpu')
         # 禁用浏览器正在被自动化程序控制的提示
@@ -25,7 +33,7 @@ class Crawler:
         # 新建chrome浏览器变量
         self.driver = webdriver.Chrome(options=self.option)
         # 最大化浏览器
-        self.driver.maximize_window()
+        # self.driver.maximize_window()
         # 判断cookie文件是否存在，不存在先登录获取cookie
         if not self.cookie_exist():
             self.login_and_save_cookies()
@@ -75,32 +83,38 @@ class Crawler:
     def click_lecture_button(self):
         """点击'讲座'关键字，进入讲座列表界面"""
         # 隐式加载界面,在进行查询元素前，如果还有未加载完，再等5秒
-        self.driver.implicitly_wait(2)
+        self.driver.implicitly_wait(1)
         self.driver.find_element('link text', '讲座').click()
 
-    def find_latest_lecture(self, lecture_keyword):
+    def find_latest_lecture(self, lecture_keyword) -> bool:
         """输入讲座标题，搜索标题，查询符合元素，获取该讲座的链接，进入讲座具体页面"""
         lecture = None
+        refresh_times = 0
         # 通话标题关键字获得讲座链接
         while lecture is None:
-            if lecture:
-                break
+            refresh_times += 1
             try:
                 lecture = self.driver.find_element('partial link text', lecture_keyword)
                 self.driver.get(lecture.get_attribute('href'))
+                return True
             except NoSuchElementException as error:
-                print('未找到讲座,刷新页面')
-            self.driver.refresh()
+                self.driver.refresh()
+                print('第' + str(refresh_times) + '次查询，未找到讲座，刷新页面')
+        return False
 
-    def enroll(self):
+    def enroll(self) -> bool:
         """在讲座详细页面中查找报名按钮，并点击"""
         # 报名按钮的xpath
         button_xpath = "//div[@class='mt-l']/button[@class='btn btn-primary btn-lg']"
         # 超时后，报名按钮的xpath
         overtime_button_xpath = "//div[@class='mt-l']/span[@class='secondary']"
-        self.driver.implicitly_wait(2)
         try:
             self.driver.find_element_by_xpath(button_xpath).click()
         except NoSuchElementException as error:
-            inform = self.driver.find_element_by_xpath(overtime_button_xpath)
-            print(inform.text)
+            try:
+                inform = self.driver.find_element_by_xpath(overtime_button_xpath)
+                print(inform.text)
+            except NoSuchElementException as error:
+                print('讲座已结束')
+                return False
+        return True
