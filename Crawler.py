@@ -110,6 +110,7 @@ class Crawler:
         overtime_button_xpath = "//div[@class='mt-l']/span[@class='secondary']"
         try:
             self.driver.find_element_by_xpath(button_xpath).click()
+            print('已报名')
         except NoSuchElementException as error:
             try:
                 inform = self.driver.find_element_by_xpath(overtime_button_xpath)
