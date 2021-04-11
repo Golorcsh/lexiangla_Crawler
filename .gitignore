@@ -2,6 +2,9 @@
 ### Python template
 # my ignore
 cookies
+.idea
+.gitignore
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
