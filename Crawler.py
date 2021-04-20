@@ -110,7 +110,9 @@ class Crawler:
         # 超时后，报名按钮的xpath
         overtime_button_xpath = "//div[@class='mt-l']/span[@class='secondary']"
         # 报名后，人数已满的xpath
-        enroll_inform_xpath= "//*[@id='app-vue']/div[2]/div/div[1]/div[1]/div/div[2]/span/span"
+        enroll_inform_xpath = "//*[@id='app-vue']/div[2]/div/div[1]/div[1]/div/div[2]/span/span"
+        # 报名后成功后的xpath
+        enroll_inform_xpath1 = "//*[@id='app-vue']/div[2]/div/div[1]/div[1]/div/div[2]/span"
 
         # 若找不到报名按钮，或报名信息，则查询讲座是否结束
         try:
@@ -119,7 +121,7 @@ class Crawler:
             print('已点击报名')
             self.driver.refresh()
             # 点击报名后，查询提示信息,是人员已满还是报名成功
-            enroll_inform = self.driver.find_element_by_xpath(enroll_inform_xpath).text
+            enroll_inform = self.driver.find_element_by_xpath(enroll_inform_xpath1).text
             print("报名情况:" + enroll_inform)
 
         except NoSuchElementException as error:
@@ -130,7 +132,7 @@ class Crawler:
                 # 查询讲座是否结束
                 try:
                     inform = self.driver.find_element_by_xpath(overtime_button_xpath)
-                    print('讲座情况:'+inform.text)
+                    print('讲座情况:' + inform.text)
                 except NoSuchElementException as error:
                     print('当前讲座页面未查询到任何相关信息')
                     return False
