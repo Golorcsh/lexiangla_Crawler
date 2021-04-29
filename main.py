@@ -24,28 +24,34 @@ def job(keyword):
     crawler.enroll()
 
 
+def get_time() -> dict:
+    times = {}
+    input_time = input('请输入抢讲座时间：')
+    begin_minute = ':59'
+    begin_second = ':10'
+    start_time = input_time + begin_minute + begin_second
+
+    end_minute = ':00'
+    end_second = ':20'
+    end_time = str(int(input_time) + 1) + end_minute + end_second
+
+    times['start'] = start_time
+    times['end'] = end_time
+    return times
+
+
 if __name__ == '__main__':
     lecture_keyword = input('请输入讲座主题关键字：')
     # 测试
     # job(keyword=lecture_keyword)
 
-    print('请选择抢讲座时间：')
-    print('1 12:00讲座')
-    print('2 17:00讲座')
-    time_mode = int(input("请输入选择："))
-    start_times = {
-        1: '11:59:20',
-        2: '16:59:20',
-    }
-    end_times = {
-        1: '12:00:30',
-        2: '17:00:30',
-    }
+    # 获得开始和结束时间
+    times = get_time()
     print('定时任务已开始')
     # schedule 添加任务
-    schedule.every().day.at(start_times[time_mode]).do(lambda: job(keyword=lecture_keyword))
+    schedule.every().day.at(times['start']).do(lambda: job(keyword=lecture_keyword))
     # schedule 添加退出任务
-    schedule.every().day.at(end_times[time_mode]).do(lambda: exit(0))
+    schedule.every().day.at(times['end']).do(lambda: exit(0))
 
     while True:
         schedule.run_pending()

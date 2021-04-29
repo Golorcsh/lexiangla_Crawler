@@ -10,13 +10,17 @@ from time import *
 import json
 import os
 from selenium.common.exceptions import NoSuchElementException
+import datetime
+from selenium.webdriver.common.by import By
 
 
 class Crawler:
     cookies = {}
     login_url = 'https://lexiangla.com/login/'
     url = 'https://lexiangla.com/events'
+
     user_agent = 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/87.0.4280.66Safari/537.36'
+    current_window = None
 
     def __init__(self, ):
         self.option = webdriver.ChromeOptions()
@@ -48,29 +52,52 @@ class Crawler:
         # 登录后获得cookies
         self.cookies = self.driver.get_cookies()
         # 保存cookies信息到文件中
-        file = open('cookies', 'w')
+        file = open('cookie', 'w')
         file.write(json.dumps(self.cookies))
         file.close()
-        print("cookies获取成功，保存cookies文件")
+        print("cookie获取成功，保存cookie文件")
 
     @staticmethod
     def cookie_exist():
         """判断cookies文件是否存在"""
-        if os.path.exists('cookies'):
+        if os.path.exists('cookie'):
             return True
         else:
             return False
 
+    @staticmethod
+    def delete_cookie():
+        """判断cookies文件是否存在，如果存在则删除cookie"""
+        if os.path.exists('cookie'):
+            os.remove('cookie')
+
+    @staticmethod
+    def cookie_is_expired(cookie_time) -> bool:
+        """判断cookie时间是否有效"""
+        cookie_time = datetime.datetime.fromtimestamp(cookie_time)
+        now_time = datetime.datetime.now()
+        if cookie_time > now_time:
+            return False
+        else:
+            return True
+
     def get_cookie(self):
         """打开读取cookie文件，返回cookie"""
         if self.cookie_exist():
-            print("cookies文件存在")
+            print("cookie文件存在")
             # 获得cookies
-            file = open('cookies', 'r')
+            file = open('cookie', 'r')
             cookie = json.loads(file.read())[-1]
             file.close()
-            print("读取cookie，返回cookie")
-            return cookie
+            cookie_time = int(cookie['expiry'])
+            # 判断cookie是已过期，如果过期删除过期cookie，并退出程序
+            if not self.cookie_is_expired(cookie_time):
+                print("读取cookie，cookie有效，返回cookie")
+                return cookie
+            else:
+                print('cookie已经过期，删除cookie')
+                self.delete_cookie()
+                exit(0)
 
     def get_html(self):
         """进入腾讯乐享活动界面"""
@@ -78,13 +105,14 @@ class Crawler:
         self.driver.add_cookie(cookie_dict=self.get_cookie())
         print("浏览器添加cookie信息，进入活动界面")
         self.driver.get(self.url)
-        print("进入讲座列表页面")
 
     def click_lecture_button(self):
         """点击'讲座'关键字，进入讲座列表界面"""
         # 隐式加载界面,在进行查询元素前，如果还有未加载完，再等5秒
+        print("进入讲座列表页面")
         self.driver.implicitly_wait(1)
-        self.driver.find_element('link text', '讲座').click()
+        lecture_xpath = '//*[@id="app-vue"]/div[2]/div/ul[1]/li[2]/a'
+        self.driver.find_element_by_xpath(lecture_xpath).click()
 
     def find_latest_lecture(self, lecture_keyword) -> bool:
         """输入讲座标题，搜索标题，查询符合元素，获取该讲座的链接，进入讲座具体页面"""
