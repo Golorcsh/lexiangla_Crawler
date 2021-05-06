@@ -77,6 +77,7 @@ class Crawler:
         cookie_time = datetime.datetime.fromtimestamp(cookie_time)
         now_time = datetime.datetime.now()
         if cookie_time > now_time:
+            print("读取cookie，cookie有效，有效期至：", cookie_time.strftime("%Y-%m-%d %H:%M:%S"), "，返回cookie")
             return False
         else:
             return True
@@ -92,7 +93,6 @@ class Crawler:
             cookie_time = int(cookie['expiry'])
             # 判断cookie是已过期，如果过期删除过期cookie，并退出程序
             if not self.cookie_is_expired(cookie_time):
-                print("读取cookie，cookie有效，返回cookie")
                 return cookie
             else:
                 print('cookie已经过期，删除cookie')
