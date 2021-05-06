@@ -28,15 +28,16 @@ def get_time() -> dict:
     times = {}
     input_time = input('请输入抢讲座时间：')
     begin_minute = ':59'
-    begin_second = ':10'
-    start_time = input_time + begin_minute + begin_second
+    begin_second = ':15'
+    start_time = str(int(input_time) - 1) + begin_minute + begin_second
 
     end_minute = ':00'
     end_second = ':20'
-    end_time = str(int(input_time) + 1) + end_minute + end_second
+    end_time = input_time + end_minute + end_second
 
     times['start'] = start_time
     times['end'] = end_time
+
     return times
 
 
