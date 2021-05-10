@@ -11,14 +11,12 @@ import json
 import os
 from selenium.common.exceptions import NoSuchElementException
 import datetime
-from selenium.webdriver.common.by import By
 
 
 class Crawler:
-    cookies = {}
+    driver_path = './chromedriver.exe'
     login_url = 'https://lexiangla.com/login/'
     url = 'https://lexiangla.com/events'
-
     user_agent = 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/87.0.4280.66Safari/537.36'
     current_window = None
 
@@ -26,50 +24,62 @@ class Crawler:
         self.option = webdriver.ChromeOptions()
         # 添加User_Agent
         self.option.add_argument(self.user_agent)
-        # 无界面模式
-        self.option.add_argument('headless')
-        # 无图模式
-        self.option.add_argument('blink-settings=imagesEnabled=false')
         # 谷歌文档提到需要加上这个属性来规避bug
         self.option.add_argument('--disable-gpu')
         # 禁用浏览器正在被自动化程序控制的提示
         self.option.add_experimental_option('excludeSwitches', ['enable-automation'])
-        # 新建chrome浏览器变量
-        self.driver = webdriver.Chrome(options=self.option)
-        # 最大化浏览器
-        # self.driver.maximize_window()
-        # 判断cookie文件是否存在，不存在先登录获取cookie
         if not self.cookie_exist():
+            # 判断cookie文件是否存在，不存在先登录获取cookie
+            # 新建chrome浏览器变量
+            self.driver = webdriver.Chrome(options=self.option, executable_path=self.driver_path)
             self.login_and_save_cookies()
+            print('请重新运行程序！程序将会在5秒后退出。')
             sleep(5)
+            self.driver.close()
+            exit(0)
+        else:
+            # 若cookie文件存在，则设置浏览器为无界面、无图片模式
+            # 无界面模式
+            self.option.add_argument('headless')
+            # 无图模式
+            self.option.add_argument('blink-settings=imagesEnabled=false')
+            # 新建chrome浏览器变量
+            self.driver = webdriver.Chrome(options=self.option, executable_path=self.driver_path)
 
     def login_and_save_cookies(self):
         """打开登陆页面，登陆后抓取cookies信息保存下来以便之后自动登陆使用"""
-        print('cookie文件不存在，请先扫描登录')
         self.driver.get(self.login_url)
-        # 暂停10秒扫码登录
-        sleep(10)
+
+        # 判断是否已经扫码登录
+        current_url = self.driver.current_url
+        print('请扫码登录')
+        while current_url == self.driver.current_url:
+            print('*', end='')
+            sleep(1)
+        print('')
+
         # 登录后获得cookies
-        self.cookies = self.driver.get_cookies()
+        cookies = self.driver.get_cookies()
         # 保存cookies信息到文件中
-        file = open('cookie', 'w')
-        file.write(json.dumps(self.cookies))
+        file = open('cookies', 'w')
+        file.write(json.dumps(cookies))
         file.close()
-        print("cookie获取成功，保存cookie文件")
+        print("cookies获取成功，保存cookies文件")
 
     @staticmethod
     def cookie_exist():
         """判断cookies文件是否存在"""
-        if os.path.exists('cookie'):
+        if os.path.exists('cookies'):
             return True
         else:
+            print('cookies文件不存在，请先扫描登录')
             return False
 
     @staticmethod
     def delete_cookie():
         """判断cookies文件是否存在，如果存在则删除cookie"""
-        if os.path.exists('cookie'):
-            os.remove('cookie')
+        if os.path.exists('cookies'):
+            os.remove('cookies')
 
     @staticmethod
     def cookie_is_expired(cookie_time) -> bool:
@@ -87,7 +97,7 @@ class Crawler:
         if self.cookie_exist():
             print("cookie文件存在")
             # 获得cookies
-            file = open('cookie', 'r')
+            file = open('cookies', 'r')
             cookie = json.loads(file.read())[-1]
             file.close()
             cookie_time = int(cookie['expiry'])

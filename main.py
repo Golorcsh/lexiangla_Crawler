@@ -43,7 +43,7 @@ def get_time() -> dict:
 
 if __name__ == '__main__':
     lecture_keyword = input('请输入讲座主题关键字：')
-    # 测试
+    # 测试例子
     # job(keyword=lecture_keyword)
 
     # 获得开始和结束时间
