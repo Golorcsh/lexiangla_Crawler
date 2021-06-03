@@ -6,7 +6,7 @@
 
 # 安装  
 >本项目使用`python` + `selenium`编写，需要如下相关包和驱动。
-> 1. 下载项目后，解压项目，使用项目中的requirement安装所需的包和依赖。在python中使用命令`pip install -r requirement` 进行安装
+> 1. 下载项目后，解压项目，使用项目中的requirement安装所需的包和依赖。在python中使用命令`pip install -r requirement.txt` 进行安装
 > 2. 下载浏览器驱动，本项目使用谷歌浏览器，需要下载与浏览器版本对应的驱动。[谷歌官方下载](https://chromedriver.chromium.org/downloads) 或[镜像下载](https://npm.taobao.org/mirrors/chromedriver)
 > 3. 下载驱动压缩包后，解压驱动，然后将`chromedriver.exe`，放到与项目同一个目录中
 --- 
