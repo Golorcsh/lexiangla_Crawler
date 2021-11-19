@@ -15,7 +15,7 @@ import datetime
 
 class Crawler:
     driver_path = './chromedriver.exe'
-    login_url = 'https://lexiangla.com/login/'
+    login_url = 'https://lexiangla.com/login?use_workwechat=1'
     url = 'https://lexiangla.com/events'
     user_agent = 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/87.0.4280.66Safari/537.36'
     current_window = None
