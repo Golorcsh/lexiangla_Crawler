@@ -25,7 +25,7 @@ def job(keyword):
 
 
 def get_time() -> dict:
-    times = {}
+    t = {}
     input_time = input('请输入抢讲座时间：')
     begin_minute = ':59'
     begin_second = ':15'
@@ -35,10 +35,10 @@ def get_time() -> dict:
     end_second = ':20'
     end_time = input_time + end_minute + end_second
 
-    times['start'] = start_time
-    times['end'] = end_time
+    t['start'] = start_time
+    t['end'] = end_time
 
-    return times
+    return t
 
 
 if __name__ == '__main__':
@@ -47,12 +47,12 @@ if __name__ == '__main__':
     # job(keyword=lecture_keyword)
 
     # 获得开始和结束时间
-    times = get_time()
+    time = get_time()
     print('定时任务已开始')
     # schedule 添加任务
-    schedule.every().day.at(times['start']).do(lambda: job(keyword=lecture_keyword))
+    schedule.every().day.at(time['start']).do(lambda: job(keyword=lecture_keyword))
     # schedule 添加退出任务
-    schedule.every().day.at(times['end']).do(lambda: exit(0))
+    schedule.every().day.at(time['end']).do(lambda: exit(0))
 
     while True:
         schedule.run_pending()
