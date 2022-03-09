@@ -38,7 +38,7 @@ def get_time() -> dict:
     t = {}
     print("输入抢讲座时间(格式为 HH:MM，例如:10:30)")
     print("输入 now 直接执行脚本(第一次运行脚本请输入now)")
-    input_time = str(input("输入时间或 now :"))
+    input_time = str(input("输入时间或 now :")).strip()
     if input_time == "now":
         return None
     pattern = R"(0\d|1\d|2[0-4]):([0-5]\d)"
@@ -73,7 +73,7 @@ def get_time() -> dict:
 if __name__ == '__main__':
     # 获得开始和结束时间
     times = get_time()
-    lecture_keyword = input('请输入讲座主题关键字(使用模糊匹配，建议输入完整的讲座名)：')
+    lecture_keyword = input('请输入讲座主题关键字(使用模糊匹配，建议输入完整的讲座名)：').strip()
     if times is None:  # 直接运行脚本
         job(keyword=lecture_keyword)
     else:  # 定时任务
