@@ -65,6 +65,10 @@ def get_time() -> dict:
         begin_time = "0" + begin_time
     if end_hour < 10:
         end_time = "0" + end_time
+    if begin_minus < 10:
+        begin_time = begin_time[0:3] + "0" + begin_time[3:]
+    if end_minus < 10:
+        end_time = end_time[0:3] + "0" + end_time[3:]
     t['start'] = begin_time
     t['end'] = end_time
     return t
@@ -77,11 +81,11 @@ if __name__ == '__main__':
     if times is None:  # 直接运行脚本
         job(keyword=lecture_keyword)
     else:  # 定时任务
-        print('定时任务已开始,脚本将会在:{}启动,请勿关闭程序!'.format(times['start']))
+        print('定时任务已开始,脚本将会在:{}启动,在{}自动关闭，请勿关闭程序!'.format(times['start'], times['end']))
         # schedule 添加任务
         schedule.every().day.at(times['start']).do(lambda: job(keyword=lecture_keyword))
         # schedule 添加退出任务
         schedule.every().day.at(times['end']).do(lambda: exit(0))
         while True:
             schedule.run_pending()
-            time.sleep(5)
+            time.sleep(1)
