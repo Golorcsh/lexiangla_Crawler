@@ -47,6 +47,7 @@ def get_time() -> dict:
         exit(0)
     h: int = int(input_time[0:2])
     m: int = int(input_time[3:])
+    # 设置合适时间，如 09:30 -> 09:29 09:32   11:00 -> 10:59 11:02
     begin_hour: int
     begin_minus: int
     end_hour: int
