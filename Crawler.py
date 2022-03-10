@@ -16,7 +16,7 @@ import datetime
 class Crawler:
     driver_path = './chromedriver.exe'
     login_url = 'https://lexiangla.com/login?use_workwechat=1'
-    url = 'https://lexiangla.com/events'
+    events_url = 'https://lexiangla.com/events'
     user_agent = 'Mozilla/5.0(WindowsNT10.0;Win64;x64)AppleWebKit/537.36(KHTML,likeGecko)Chrome/87.0.4280.66Safari/537.36'
     current_window = None
 
@@ -111,16 +111,16 @@ class Crawler:
 
     def get_html(self):
         """进入腾讯乐享活动界面"""
-        self.driver.get(self.url)
+        self.driver.get(self.events_url)
         self.driver.add_cookie(cookie_dict=self.get_cookie())
         print("浏览器添加cookie信息，进入活动界面")
-        self.driver.get(self.url)
+        self.driver.get(self.events_url)
 
     def click_lecture_button(self):
         """点击'讲座'关键字，进入讲座列表界面"""
         # 隐式加载界面,在进行查询元素前，如果还有未加载完，再等5秒
         print("进入讲座列表页面")
-        self.driver.implicitly_wait(1)
+        self.driver.implicitly_wait(2)
         lecture_xpath = '//*[@id="app-vue"]/div[2]/div/ul[1]/li[2]/a'
         self.driver.find_element_by_xpath(lecture_xpath).click()
 
